@@ -1,0 +1,175 @@
+name: Staff Data Submission
+description: Submit staff information data
+title: "[Staff Data] "
+labels: ["staff-data", "automated-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Government of Sindh - Staff Data Entry
+        Please fill in all required fields below.
+  
+  - type: markdown
+    attributes:
+      value: "---"
+  
+  - type: markdown
+    attributes:
+      value: "### 🏫 School Information"
+  
+  - type: input
+    id: semis-code
+    attributes:
+      label: Semis Code
+      description: School SEMIS code (numbers only)
+      placeholder: "123456"
+    validations:
+      required: true
+  
+  - type: input
+    id: cluster-hub
+    attributes:
+      label: Cluster Hub/Cell
+      placeholder: "GBHSS - MIRPUR SAKRO TX23027"
+      value: "GBHSS - MIRPUR SAKRO TX23027"
+    validations:
+      required: true
+  
+  - type: input
+    id: cost-centre
+    attributes:
+      label: Cost Centre
+      placeholder: "Enter cost centre"
+    validations:
+      required: true
+  
+  - type: input
+    id: district
+    attributes:
+      label: District
+      placeholder: "Thatta"
+      value: "Thatta"
+    validations:
+      required: true
+  
+  - type: input
+    id: taluka
+    attributes:
+      label: Taluka
+      placeholder: "Mirpur Sakro"
+      value: "Mirpur Sakro"
+    validations:
+      required: true
+  
+  - type: input
+    id: uc
+    attributes:
+      label: UC (Union Council)
+      placeholder: "Enter UC"
+    validations:
+      required: true
+  
+  - type: markdown
+    attributes:
+      value: "---"
+  
+  - type: markdown
+    attributes:
+      value: "### 👤 Personal Information"
+  
+  - type: input
+    id: personal-id
+    attributes:
+      label: Personal ID
+      description: Staff personal ID number
+      placeholder: "123456"
+    validations:
+      required: true
+  
+  - type: input
+    id: full-name
+    attributes:
+      label: Name in Full
+      placeholder: "Enter full name"
+    validations:
+      required: true
+  
+  - type: input
+    id: date-of-birth
+    attributes:
+      label: Date of Birth
+      description: Format YYYY-MM-DD
+      placeholder: "1990-01-15"
+    validations:
+      required: true
+  
+  - type: input
+    id: cnic
+    attributes:
+      label: CNIC No
+      description: Format - #####-#######-#
+      placeholder: "12345-1234567-1"
+    validations:
+      required: true
+  
+  - type: markdown
+    attributes:
+      value: "---"
+  
+  - type: markdown
+    attributes:
+      value: "### 💼 Employment Details"
+  
+  - type: input
+    id: designation
+    attributes:
+      label: Designation
+      placeholder: "Enter designation"
+    validations:
+      required: true
+  
+  - type: input
+    id: bps
+    attributes:
+      label: BPS
+      description: Basic Pay Scale (1-22)
+      placeholder: "16"
+    validations:
+      required: true
+  
+  - type: input
+    id: entry-date
+    attributes:
+      label: Date of Entry in Govt Service
+      description: Format YYYY-MM-DD
+      placeholder: "2010-06-15"
+    validations:
+      required: true
+  
+  - type: input
+    id: posting-date
+    attributes:
+      label: Date of Posting at Current School
+      description: Format YYYY-MM-DD
+      placeholder: "2020-03-10"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: salary-drawn
+    attributes:
+      label: Salary Drawn
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Remarks
+      description: Additional notes or comments
+      placeholder: "Enter any additional information"
+    validations:
+      required: false
