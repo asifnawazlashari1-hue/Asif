@@ -1,0 +1,174 @@
+name: Convert Issues to Excel
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+  workflow_dispatch:  # Allow manual trigger
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+
+jobs:
+  convert-to-excel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          pip install pandas openpyxl requests
+      
+      - name: Create conversion script
+        run: |
+          cat > convert_issues.py << 'EOF'
+          import requests
+          import json
+          import pandas as pd
+          import re
+          from datetime import datetime
+          import os
+
+          # Get repository info from environment
+          REPO = os.environ.get('GITHUB_REPOSITORY')
+          TOKEN = os.environ.get('GITHUB_TOKEN')
+
+          headers = {
+              'Authorization': f'token {TOKEN}',
+              'Accept': 'application/vnd.github.v3+json'
+          }
+
+          # Fetch all issues with staff-data label
+          print("Fetching issues from GitHub...")
+          issues_url = f'https://api.github.com/repos/{REPO}/issues'
+          params = {
+              'labels': 'staff-data',
+              'state': 'all',
+              'per_page': 100
+          }
+
+          all_issues = []
+          page = 1
+          while True:
+              params['page'] = page
+              response = requests.get(issues_url, headers=headers, params=params)
+              if response.status_code != 200:
+                  print(f"Error fetching issues: {response.status_code}")
+                  break
+              
+              issues = response.json()
+              if not issues:
+                  break
+              
+              all_issues.extend(issues)
+              page += 1
+
+          print(f"Found {len(all_issues)} issues")
+
+          # Extract data from issues
+          staff_records = []
+
+          for issue in all_issues:
+              body = issue.get('body', '')
+              
+              # Try to extract JSON data from comment
+              json_match = re.search(r'<!-- DATA_JSON\s*\n(.*?)\n-->', body, re.DOTALL)
+              
+              if json_match:
+                  try:
+                      data = json.loads(json_match.group(1))
+                      data['issue_number'] = issue['number']
+                      data['issue_url'] = issue['html_url']
+                      data['issue_created_at'] = issue['created_at']
+                      staff_records.append(data)
+                  except json.JSONDecodeError:
+                      print(f"Could not parse JSON from issue #{issue['number']}")
+
+          print(f"Extracted {len(staff_records)} valid records")
+
+          if staff_records:
+              # Create DataFrame
+              df = pd.DataFrame(staff_records)
+              
+              # Reorder columns for better readability
+              column_order = [
+                  'issue_number',
+                  'personalId',
+                  'fullName',
+                  'cnicNo',
+                  'dateOfBirth',
+                  'designation',
+                  'bps',
+                  'semisCode',
+                  'clusterHubCell',
+                  'costCentre',
+                  'district',
+                  'taluka',
+                  'uc',
+                  'dateOfEntryGovtService',
+                  'dateOfPosting',
+                  'salaryDrawn',
+                  'remarks',
+                  'submittedAt',
+                  'issue_url',
+                  'issue_created_at'
+              ]
+              
+              # Only include columns that exist
+              column_order = [col for col in column_order if col in df.columns]
+              df = df[column_order]
+              
+              # Save to Excel with formatting
+              excel_file = 'staff_data.xlsx'
+              with pd.ExcelWriter(excel_file, engine='openpyxl') as writer:
+                  df.to_excel(writer, index=False, sheet_name='Staff Records')
+                  
+                  # Get the worksheet
+                  worksheet = writer.sheets['Staff Records']
+                  
+                  # Auto-adjust column widths
+                  for column in worksheet.columns:
+                      max_length = 0
+                      column_letter = column[0].column_letter
+                      for cell in column:
+                          try:
+                              if len(str(cell.value)) > max_length:
+                                  max_length = len(str(cell.value))
+                          except:
+                              pass
+                      adjusted_width = min(max_length + 2, 50)
+                      worksheet.column_dimensions[column_letter].width = adjusted_width
+              
+              print(f"✅ Excel file created: {excel_file}")
+              print(f"📊 Total records: {len(df)}")
+          else:
+              print("⚠️ No valid records found to export")
+          EOF
+      
+      - name: Run conversion script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python convert_issues.py
+      
+      - name: Commit and push Excel file
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if [ -f staff_data.xlsx ]; then
+            git add staff_data.xlsx
+            git diff --staged --quiet || git commit -m "📊 Update staff data Excel file [automated]"
+            git push
+            echo "✅ Excel file updated successfully"
+          else
+            echo "⚠️ No Excel file to commit"
+          fi
