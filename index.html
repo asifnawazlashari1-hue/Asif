@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Data Form</title>
+<style>
+body { font-family: Arial, sans-serif; background-color: #e8f5e9; color: #2e7d32; padding: 20px; }
+form { background-color: #fff; border-radius: 10px; padding: 20px; max-width: 700px; margin: auto; box-shadow: 0 0 10px rgba(46,125,50,0.3);}
+label { display: block; margin-top: 10px; font-weight: bold; }
+input, select { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #c8e6c9; }
+button { margin-top: 20px; padding: 10px 20px; background-color: #2e7d32; color: white; border: none; border-radius: 10px; cursor: pointer; }
+button:hover { background-color: #1b5e20; }
+</style>
+</head>
+<body>
+<h2>Staff Data Form</h2>
+<form id="staffForm">
+<label>Semis Code:</label><input type="text" name="semisCode" required>
+<label>Cluster Hub/Cell:</label><input type="text" name="clusterHubCell" required>
+<label>Cost Centre:</label><input type="text" name="costCentre" required>
+<label>District:</label><input type="text" name="district" required>
+<label>Taluka:</label><input type="text" name="taluka" required>
+<label>UC:</label><input type="text" name="uc" required>
+<label>Personal ID:</label><input type="text" name="personalId" required>
+<label>Name in Full:</label><input type="text" name="fullName" required>
+<label>Date of Birth:</label><input type="date" name="dateOfBirth" required>
+<label>CNIC No:</label><input type="text" name="cnicNo" placeholder="12345-1234567-1" required pattern="\d{5}-\d{7}-\d{1}">
+<label>Designation:</label><input type="text" name="designation" required>
+<label>BPS:</label><input type="number" name="bps" required min="1">
+<label>Date of Entry in Govt Service:</label><input type="date" name="dateOfEntryGovtService" required>
+<label>Date of Posting at Current School:</label><input type="date" name="dateOfPosting" required>
+<label>Salary Drawn (Yes/No):</label>
+<select name="salaryDrawn" required>
+<option value="">Select</option>
+<option value="Yes">Yes</option>
+<option value="No">No</option>
+</select>
+<label>Remarks:</label><input type="text" name="remarks">
+<button type="submit">Submit</button>
+</form>
+
+<script>
+const endpoint = "https://script.google.com/macros/s/AKfycbyVj0_wn-HHsMlF14aV1n9Ngpfb_0f4SB7kquGGyp--IjHIhzPBbZ2jtu62kWOOdrYz/exec";
+document.getElementById("staffForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {};
+    formData.forEach((val,key)=>data[key]=val);
+    fetch(endpoint,{
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({data})
+    }).then(res=>res.json())
+      .then(res=>res.status==="success"?alert("Submitted successfully!"):alert("Error: "+res.error))
+      .catch(err=>alert("Submission failed: "+err));
+});
+</script>
+</body>
+</html>
