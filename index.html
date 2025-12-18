@@ -41,19 +41,36 @@ button:hover { background-color: #1b5e20; }
 </form>
 
 <script>
-const endpoint = "https://script.google.com/macros/s/AKfycbyVj0_wn-HHsMlF14aV1n9Ngpfb_0f4SB7kquGGyp--IjHIhzPBbZ2jtu62kWOOdrYz/exec";
+const endpoint = "https://script.google.com/macros/s/AKfycbzES1Wm4sHUPMGE1bHoYsJW1MsySdB_9RWTBWjp34tMhRb4jbj7VjNYyuMnTGEJhlKl/exec";
+
 document.getElementById("staffForm").addEventListener("submit", e => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = {};
     formData.forEach((val,key)=>data[key]=val);
-    fetch(endpoint,{
-        method:"POST",
+
+    // CNIC validation
+    const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
+    if(!cnicPattern.test(data.cnicNo)){
+        alert("Invalid CNIC format: 12345-1234567-1");
+        return;
+    }
+
+    fetch(endpoint, {
+        method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({data})
-    }).then(res=>res.json())
-      .then(res=>res.status==="success"?alert("Submitted successfully!"):alert("Error: "+res.error))
-      .catch(err=>alert("Submission failed: "+err));
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === "success") {
+            alert("Data submitted successfully!");
+            e.target.reset();
+        } else {
+            alert("Submission error: "+res.error);
+        }
+    })
+    .catch(err => alert("Submission failed: "+err));
 });
 </script>
 </body>
