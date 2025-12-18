@@ -15,7 +15,8 @@ button:hover { background-color: #1b5e20; }
 </head>
 <body>
 <h2>Staff Data Form</h2>
-<form id="staffForm">
+
+<form id="staffForm" method="post" action="https://script.google.com/macros/s/AKfycbzES1Wm4sHUPMGE1bHoYsJW1MsySdB_9RWTBWjp34tMhRb4jbj7VjNYyuMnTGEJhlKl/exec" target="_blank">
 <label>Semis Code:</label><input type="text" name="semisCode" required>
 <label>Cluster Hub/Cell:</label><input type="text" name="clusterHubCell" required>
 <label>Cost Centre:</label><input type="text" name="costCentre" required>
@@ -40,38 +41,5 @@ button:hover { background-color: #1b5e20; }
 <button type="submit">Submit</button>
 </form>
 
-<script>
-const endpoint = "https://script.google.com/macros/s/AKfycbzES1Wm4sHUPMGE1bHoYsJW1MsySdB_9RWTBWjp34tMhRb4jbj7VjNYyuMnTGEJhlKl/exec";
-
-document.getElementById("staffForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = {};
-    formData.forEach((val,key)=>data[key]=val);
-
-    // CNIC validation
-    const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
-    if(!cnicPattern.test(data.cnicNo)){
-        alert("Invalid CNIC format: 12345-1234567-1");
-        return;
-    }
-
-    fetch(endpoint, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({data})
-    })
-    .then(res => res.json())
-    .then(res => {
-        if(res.status === "success") {
-            alert("Data submitted successfully!");
-            e.target.reset();
-        } else {
-            alert("Submission error: "+res.error);
-        }
-    })
-    .catch(err => alert("Submission failed: "+err));
-});
-</script>
 </body>
 </html>
